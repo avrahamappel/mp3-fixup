@@ -11,7 +11,13 @@
   outputs = { nixpkgs, rust-overlay, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        overlays = [ (import rust-overlay) ];
+        overlays = [
+          (import rust-overlay)
+          # Uncomment this if we need the full ffmpeg
+          # (self: super: {
+          #   ffmpeg = super.ffmpeg-full;
+          # })
+        ];
         pkgs = import nixpkgs {
           inherit system overlays;
         };
