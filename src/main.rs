@@ -1,5 +1,5 @@
 // use std::fs;
-use std::fs::DirEntry;
+// use std::fs::DirEntry;
 use std::path::Path;
 
 use clap::Parser;
@@ -34,9 +34,9 @@ impl Track {
         Self {
             name: path
                 .file_name()
-                .expect("Path {path} didn't have a file name")
+                .expect("Path didn't have a file name")
                 .to_str()
-                .expect("Path {path} couldn't be converted to unicode string")
+                .expect("Path couldn't be converted to unicode string")
                 .to_string(),
         }
     }
@@ -48,31 +48,32 @@ struct Album {
 }
 
 impl Album {
-    fn new(dir: DirEntry) -> Self {
-        println!("{dir:?}");
-
-        let name = dir
+    fn new(path: &Path) -> Self {
+        let name = path
             .file_name()
+            .expect("Path didn't have a file name")
             .to_str()
-            .expect("Path {path} couldn't be converted to unicode string")
+            .expect("Path couldn't be converted to unicode string")
             .to_string();
 
-        let tracks = dir
-            .path()
+        let tracks = path
             .read_dir()
-            .unwrap()
+            .expect("Path wasn't a directory")
             .filter_map(Result::ok)
             .filter_map(|entry| {
                 let path = entry.path();
-                ["mp3", "m4a"]
-                    .contains(
-                        &path
-                            .extension()
-                            .expect("Path {path} doesn't have an extension")
-                            .to_str()
-                            .expect("Path {path} extension couldn't be converted to unicode"),
-                    )
-                    .then_some(Track::new(&path))
+
+                // println!("{path:?}");
+
+                match path.extension() {
+                    None => None,
+                    Some(ext) => ["mp3", "m4a"]
+                        .contains(
+                            &ext.to_str()
+                                .expect("Path extension couldn't be converted to unicode"),
+                        )
+                        .then(|| Track::new(&path)),
+                }
             })
             .collect();
 
@@ -90,9 +91,9 @@ impl Metadata {
         let path = Path::new(&path);
         let author = path
             .file_name()
-            .expect("Path {path} didn't have a file name")
+            .expect("Path didn't have a file name")
             .to_str()
-            .expect("Path {path} couldn't be converted to unicode string")
+            .expect("Path couldn't be converted to unicode string")
             .to_string();
 
         let albums = path
@@ -100,11 +101,11 @@ impl Metadata {
             .unwrap()
             .filter_map(Result::ok)
             .filter_map(|entry| {
-                entry
-                    .file_type()
-                    .expect("Couldn't get file type for {entry}")
-                    .is_dir()
-                    .then_some(Album::new(entry))
+                let path = entry.path();
+
+                // println!("{path:?}");
+
+                path.is_dir().then(|| Album::new(&path))
             })
             .collect();
 
