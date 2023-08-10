@@ -20,6 +20,7 @@
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             ffmpeg
+            pkg-config
             rust-bin.stable.latest.default
             rust-analyzer
           ];
