@@ -87,8 +87,8 @@ struct Metadata {
 }
 
 impl Metadata {
-    fn new(path: String) -> Self {
-        let path = Path::new(&path);
+    fn new(path: &str) -> Self {
+        let path = Path::new(path);
         let author = path
             .file_name()
             .expect("Path didn't have a file name")
@@ -122,7 +122,7 @@ fn main() {
 
     println!("Path: {}", args.path);
 
-    let meta = Metadata::new(args.path);
+    let meta = Metadata::new(&args.path);
 
     for album in meta.albums {
         for track in album.tracks {
